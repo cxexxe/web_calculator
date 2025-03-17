@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>웹 계산기</title>
+</head>
+<body>
+    <div class="wrap">
+        <div class="calculator_wrap">
+            <div class="calculator">
+                <div class="top">
+                    <div class="num">0</div>
+                </div>
+                <div class="bottom">
+                    <div class="pad">
+                        <ul class="row">
+                            <li class="key_box"><div class="key">del</div></li>
+                            <li class="key_box"><div class="key">CE</div></li>
+                            <li class="key_box"><div class="key">%</div></li>
+                            <li class="key_box"><div class="key">÷</div></li>
+                        </ul>
+                        <ul class="row">
+                            <li class="key_box"><div class="key">7</div></li>
+                            <li class="key_box"><div class="key">8</div></li>
+                            <li class="key_box"><div class="key">9</div></li>
+                            <li class="key_box"><div class="key">×</div></li>
+                        </ul>
+                        <ul class="row">
+                            <li class="key_box"><div class="key">4</div></li>
+                            <li class="key_box"><div class="key">5</div></li>
+                            <li class="key_box"><div class="key">6</div></li>
+                            <li class="key_box"><div class="key">-</div></li>
+                        </ul>
+                        <ul class="row">
+                            <li class="key_box"><div class="key">1</div></li>
+                            <li class="key_box"><div class="key">2</div></li>
+                            <li class="key_box"><div class="key">3</div></li>
+                            <li class="key_box"><div class="key">+</div></li>
+                        </ul>
+                        <ul class="row">
+                            <li class="key_box"><div class="key">+/-</div></li>
+                            <li class="key_box"><div class="key">0</div></li>
+                            <li class="key_box"><div class="key">.</div></li>
+                            <li class="key_box color"><div class="key">=</div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        //변수 선언
+        let currentInput = '';  // 사용자가 현재 입력한 숫자
+        let operator = '';      // 현재 선택된 연산자
+        let previousInput = ''; // 이전에 입력한 숫자 및 연산자
+    
+        //numDisplay는 계산기 화면을 나타내는 요소
+        const numDisplay = document.querySelector('.num'); //가져오기
+    
+        // 화면에 현재 입력 값을 업데이트하는 함수
+        function updateDisplay() {
+            // 표시될 텍스트를 설정하는 속성 = *이전 입력 + 연산자 + 현재 입력* 표시
+            //연산자가 있을 경우 연산자 앞뒤에 공백 추가 연산자가 없으면 빈 문자열('')을 반환
+            //'' || '0'이 되어 '0'이 표시, 계산기가 비어 있을 때 기본적으로 0이 화면에 보이도록 함
+            numDisplay.textContent = previousInput + (operator ? ' ' + operator + ' ' : '') + currentInput || '0';
+            adjustFontSize(); // 숫자가 길어질 경우, 글씨 크기를 자동으로 조정하는 함수
+        }
+    
+        // 폰트 크기를 조정하는 함수
+        function adjustFontSize() {
+            const maxFontSize = 60; // 최대 폰트 크기
+            const minFontSize = 20; // 최소 폰트 크기
+            const length = numDisplay.textContent.length; // 현재 화면에 표시된 숫자의 길이 (문자열) 측정
+    
+            // 문자열 길이에 따라 폰트 크기 계산
+            let newFontSize = maxFontSize;
+    
+            if (length > 10) { // 글자가 10개를 초과하면, length - 10 만큼 2px씩 줄여줌
+                newFontSize = Math.max(minFontSize, maxFontSize - (length - 10) * 2); // 
+            } //minFontSize(20px)보다 작아지지 않도록 Math.max()를 사용
+            
+            numDisplay.style.fontSize = newFontSize + 'px'; //numDisplay(화면 표시 부분)의 fontSize를 업데이트
+        }
+    
+        // 입력창에 숫자를 추가하는 함수
+        function appendNumber(number) {
+            if (number === '.' && currentInput.includes('.')) return; // 이미 소수점이 있으면 추가하지 않음
+            currentInput += number; // 현재 입력에 숫자를 추가
+            updateDisplay();        // 화면 업데이트
+        }
+    
+        // 연산자를 설정하는 함수
+        function setOperator(op) {
+            // 현재 입력이 없으면 연산자만 변경
+            if (currentInput === '' && previousInput === '') return; // 입력이 없으면 함수 종료
+    
+            if (currentInput !== '') {
+                // 현재 입력이 있을 경우, 이전 입력에 현재 입력 추가
+                previousInput += (previousInput ? ' ' + operator + ' ' : '') + currentInput;
+            }
+            
+            operator = op; // 새로운 연산자 설정
+            currentInput = ''; // 현재 입력 초기화
+            updateDisplay(); // 화면 업데이트
+        }
+    
+        // 계산을 수행하는 함수
+        function calculate() {
+            if (currentInput === '' && previousInput === '') return; //아무 숫자도 입력하지 않은 상태에서 = 버튼을 누르면 함수 종료
+    
+            // 전체 수식을 계산
+            const expression = previousInput + (operator ? ' ' + operator + ' ' : '') + currentInput; //연산자가 존재하면 연산자도 포함 
+            //연산자가 없으면 그냥 이전 입력 + 현재 입력을 이어 붙임
+            // eval을 사용하여 계산
+            const result = eval(expression.replace(/×/g, '*').replace(/÷/g, '/')); //연산자 *와 /로 변환 (실제 계산 가능하도록)
+            currentInput = result.toString(); // 계산 결과를 문자열로 변환해서 화면에 표시
+
+            operator = ''; // 연산자 초기화
+            previousInput = ''; // 이전 입력 초기화 -> 새로운 계산 준비
+            updateDisplay(); // 화면 업데이트
+        }
+    
+        // DEL: 현재 입력에서 마지막 숫자 또는 연산자를 지우는 함수
+        function deleteLast() {
+            if (currentInput.length > 0) {
+                currentInput = currentInput.slice(0, -1); // 사용자가 숫자를 입력 중인 경우, 마지막 숫자 삭제
+            } else if (operator) {
+                
+                operator = ''; // 현재 입력이 없고, 연산자가 있을 경우, 연산자 삭제
+            } else {
+                // 이전 입력도 없는 경우 전체 수식에서 마지막 숫자/연산자를 삭제
+                previousInput = previousInput.trim().split(' ').slice(0, -1).join(' '); // 마지막 입력 삭제
+            }
+            updateDisplay(); // 화면 업데이트
+        }
+    
+        // CE: 모든 입력을 초기화하는 함수
+        function clearAll() {
+            currentInput = ''; // 현재 입력 초기화
+            previousInput = ''; // 이전 입력 초기화
+            operator = ''; // 연산자 초기화
+            updateDisplay(); // 화면 업데이트
+        }
+    
+        // 모든 버튼에 클릭 이벤트 추가
+        document.querySelectorAll('.key').forEach(key => {
+            key.addEventListener('click', () => { //버튼 클릭 시 아래 동작 수행
+                const value = key.textContent; // 버튼의 텍스트를 value 변수에 저장
+                if (!isNaN(value) || value === '.') { // 숫자 또는 '.'일 경우
+                    appendNumber(value); // 해당 값을 appendNumber(value) 함수로 전달하여 숫자나 소수점을 추가하도록 함
+                } else if (value === 'CE') { // 'CE'일 경우
+                    clearAll(); // 모든 입력 초기화
+                } else if (value === 'del') { // 'del'일 경우
+                    deleteLast(); // 마지막 입력 삭제
+                } else if (value === '=') { // '='일 경우
+                    calculate(); // 계산 수행
+                } else {
+                    setOperator(value); // 연산자 설정
+                }
+            });
+        });
+    </script>
+    
+</body>
+</html>
